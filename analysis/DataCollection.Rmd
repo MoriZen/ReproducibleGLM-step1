@@ -58,3 +58,31 @@ dbWriteTable(titanicdb, "titanic", head(titanic_all), append=TRUE)
 ```
 
 Restore your original data with your get_data.R file.
+
+## Data cleaning
+The more variables with very low variance or that are highly correlated with other variables that you can remove, the smaller your file size and the more you can concentrate on the remainder.
+```{r}
+View(titanic_all)
+summary(titanic_all)
+nzv <- caret::nearZeroVar(titanic_all)
+colnames(titanic_all)[nzv]
+titanicNZV <- titanic_all[, -nzv]
+names(titanic_all)
+pairs(titanic_all)
+numericCols <- sapply(titanicNZV,is.numeric)
+titanic_all_numeric <- titanicNZV[, numericCols]
+cor(titanic_all_numeric, use = "pairwise.complete.obs")
+cor(na.omit(titanic_all_numeric))
+
+caret::findCorrelation(cor(titanic_all_numeric, use = "pairwise.complete.obs")) #checks for total correlation with all other variables. If it returns the integer(0) then there are no columns to remove
+
+```
+## Processing characters
+
+```{r processclass}
+stringcols <- sapply(titanic_all, is.character)
+
+titanic_all$pclass <- as.factor(titanic_all$pclass)
+
+summary(titanicPClass)
+```
