@@ -34,6 +34,7 @@ knitr::kable(summary(titanic_all))
 
 ## Defensive stuff
 ### Store a copy (one-off)
+We will use the cache file to keep the data file size small.
 ```{r cacheresult}
 cache_file<-"../data-raw/rawdatacache.Rdata"
 if(!file.exists(cache_file)) {
@@ -44,6 +45,7 @@ if(!file.exists(cache_file)) {
 ```
 
 ### Check for changes
+Check that the original data is still the same as the cache data otherwise throw an error so you'll get things out.
 ```{r checkforchange}
 load(cache_file)
 if(!identical(titanic_all, titanic_cache)) stop("Hey, the data has changed, you should check that out!")
