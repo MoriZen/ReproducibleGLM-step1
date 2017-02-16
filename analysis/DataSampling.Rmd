@@ -1,23 +1,23 @@
 ---
 title: "Data sampling"
-author: "Steph Locke"
+author: "Steph Locke, modified by Lee-Anne Cecchini"
 date: "15 February 2017"
 output: html_document
 ---
 
-We want to split our data into a training and a test sample for predicting survival of the Titanic. There are two sampling strategies we'll consider here. 
+We want to split our data into a training and a test sample for predicting survival of the Titanic. There are two sampling strategies we'll consider here. Consider splitting data first so that you aren't using information from the test data when you, for example, scale a variable in the data. This is basically doing some fitting before you split the data.
 
 ## Random sample
 ```{r usingsample}
-n_titanic_all<-nrow(titanic_all)
-prop_train<-0.7
-n_train<-floor(prop_train * n_titanic_all)
+n_titanic_all <- nrow(titanic_all)
+prop_train <- 0.7
+n_train <- floor(prop_train * n_titanic_all)
 
 # Sample RowIDs
-rows_train_s<-sample.int(n_titanic_all, n_train)
+rows_train_s <- sample.int(n_titanic_all, n_train)
 
-titanic_train_s<-titanic_all[rows_train_s,]
-titanic_test_s<-titanic_all[-rows_train_s,]
+titanic_train_s <- titanic_all[rows_train_s, ]
+titanic_test_s <- titanic_all[-rows_train_s, ]
 ```
 
 ### Class Distribution
@@ -28,6 +28,7 @@ t.test(titanic_train_s$survived, titanic_test_s$survived, conf.level = .95)$p.va
 ```
 
 #### How often would they be sufficiently similar?
+You ideally want the class (Yes/No) distribution to be similar in training and testing data.
 ```{r samplerep}
 pass_ttest<-function(x, prop_train = .07){
   n_x_all<-length(x)
@@ -43,29 +44,31 @@ sum(replicate(1000,pass_ttest(titanic_all$survived)))/1000
 ```
 
 #### How do we get the same sample every time?
+For reproducibility, you need to set the seed, then check that your sample satisfies the similarity criteria (from the same distribution)
 ```{r setseed}
-pass_ttest<-function(x, prop_train = .07){
+pass_ttest <- function(x, prop_train = .07) {
   set.seed(6767)
-  n_x_all<-length(x)
-  n_train<-floor(prop_train * n_x_all)
+  n_x_all <- length(x)
+  n_train <- floor(prop_train * n_x_all)
   
   # Sample RowIDs
-  rows_train<-sample.int(n_x_all, n_train)
+  rows_train <- sample.int(n_x_all, n_train)
   
   t.test(x[rows_train], x[-rows_train], conf.level = .95)$p.value >= .05
 }
 
-sum(replicate(1000,pass_ttest(titanic_all$survived)))/1000
+sum(replicate(1000, pass_ttest(titanic_all$survived))) / 1000
 ```
 
 ## Maintaining class ratio
-Using caret
+Using caret package: helps with data selection, feature prep and other useful functions.
 
 ```{r caretsample}
 library(caret)
-rows_train_c<-createDataPartition(titanic_all$survived, p = prop_train, list=FALSE)
-titanic_train_c<-titanic_all[rows_train_c,]
-titanic_test_c<-titanic_all[-rows_train_c,]
+rows_train_c <-
+createDataPartition(titanic_all$survived, p = prop_train, list = FALSE)
+titanic_train_c <- titanic_all[rows_train_c, ]
+titanic_test_c <- titanic_all[-rows_train_c, ]
 ```
 
 ### Testing the class ratio
@@ -92,9 +95,10 @@ We saw that we can set the seed within in a function to always yield the same va
 ```{r finalcaretsample}
 library(caret)
 set.seed(8787)
-rows_train_c<-createDataPartition(titanic_all$survived, p = prop_train, list=FALSE)
-titanic_train_c<-titanic_all[rows_train_c,]
-titanic_test_c<-titanic_all[-rows_train_c,]
+rows_train_c <-
+createDataPartition(titanic_all$survived, p = prop_train, list = FALSE)
+titanic_train_c <- titanic_all[rows_train_c, ]
+titanic_test_c <- titanic_all[-rows_train_c, ]
 ```
 
 ### Storing a copy (one-off)
